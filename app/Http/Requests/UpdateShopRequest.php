@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Shop;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class UpdateShopRequest extends FormRequest
@@ -13,10 +15,8 @@ class UpdateShopRequest extends FormRequest
      */
     public function authorize(): bool
     {
-//        $shopId = $this->route('shop');
-//        $shop = Shop::find($shopId);
-//        return Auth::id() == $shop->user_id;
-        return true;
+        $shop = $this->route('shop');
+        return Auth::id() == $shop->user_id;
     }
 
     /**
@@ -27,7 +27,7 @@ class UpdateShopRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'shop_name' => ['required', 'string', 'max:255'],
+            'shop_name' => ['nullable', 'string', 'max:255'],
             'shop_theme' => ['nullable', 'string', 'max:255'],
             'biography' => ['nullable', 'string', 'max:5000'],
         ];
@@ -47,7 +47,7 @@ class UpdateShopRequest extends FormRequest
             'shop_theme.string' => 'Le thème de la boutique doit être une chaîne de caractères.',
             'shop_theme.max' => 'Le thème de la boutique ne doit pas dépasser 255 caractères.',
             'biography.string' => 'La biographie doit être une chaîne de caractères.',
-            'biography.max' => 'La biographie ne doit pas dépasser 5000 caractères.',
+            'biography.max' => 'La biographie ne doit pas dépasser 5000 caractères.'
         ];
     }
 }

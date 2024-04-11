@@ -35,7 +35,7 @@ class ShopController extends Controller
     {
         $shop = new Shop();
         $shop->fill($request->validated());
-        $user = Auth::user();
+        $user = $request->user();
         $user->shops()->save($shop);
         return response()->json($shop, 201);
     }
@@ -71,7 +71,9 @@ class ShopController extends Controller
      */
     public function destroy(Shop $shop): JsonResponse
     {
-        $shop->delete();
-        return response()->json(['message' => 'Product deleted successfully.'], 200);
+        if (Auth::id() == $shop->user_id) {
+            $shop->delete();
+        }
+        return response()->json(['message' => 'Shop deleted successfully.'], 200);
     }
 }

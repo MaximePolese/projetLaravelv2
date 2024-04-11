@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class StoreShopRequest extends FormRequest
@@ -13,7 +14,7 @@ class StoreShopRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::id() == $this->user()->id;
     }
 
     /**
