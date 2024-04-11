@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class UpdateProductRequest extends FormRequest
@@ -13,10 +14,8 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-//        $productId = $this->route('product');
-//        $product = Product::find($productId);
-//        return Auth::id() == $product->shop->user_id;
-        return true;
+        $product = $this->route('product');
+        return Auth::id() == $product->shop->user_id;
     }
 
     /**
@@ -27,17 +26,16 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_name' => ['required', 'string', 'max:255'],
+            'product_name' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'story' => ['nullable', 'string', 'max:5000'],
             'image' => ['nullable', 'string', 'max:255'],
             'material' => ['nullable', 'string', 'max:255'],
             'color' => ['nullable', 'string', 'max:255'],
             'size' => ['nullable', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'updated_at' => ['date'],
+            'category' => ['nullable', 'string', 'max:255'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'stock_quantity' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
@@ -73,7 +71,6 @@ class UpdateProductRequest extends FormRequest
             'stock_quantity.required' => 'La quantité en stock est obligatoire.',
             'stock_quantity.integer' => 'La quantité en stock doit être un entier.',
             'stock_quantity.min' => 'La quantité en stock ne doit pas être inférieure à 0.',
-            'updated_at.date' => 'La date de mise à jour doit être une date valide.',
         ];
     }
 }

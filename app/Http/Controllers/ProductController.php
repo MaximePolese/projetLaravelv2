@@ -40,8 +40,9 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request): Product
     {
         $product = new Product();
+        $user = $request->user();
+        $shop = $user->shops()->find($request->shop_id);
         $product->fill($request->validated());
-        $shop = Auth::user()->shops()->find($request->shop_id);
         $shop->products()->save($product);
         return $product;
     }
@@ -89,7 +90,9 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): JsonResponse
     {
-        $product->delete();
+        if (Auth::id() == $product->shop->user_id) {
+            $product->delete();
+        }
         return response()->json(['message' => 'Product deleted successfully.'], 200);
     }
 
@@ -163,10 +166,11 @@ class ProductController extends Controller
         return $query->get();
     }
 
+//TODO: Implement the addProductToOrder method
     public function addProductToOrder(Request $request, Product $product): Product
     {
-        $order = Auth::user()->orders()->where('status', 'pending')->first();
-        $order->products()->attach($product->id, ['quantity' => $request->quantity]);
+//        $order = Auth::user()->orders()->where('status', 'pending')->first();
+//        $order->products()->attach($product->id, ['quantity' => $request->quantity]);
         return $product;
     }
 }

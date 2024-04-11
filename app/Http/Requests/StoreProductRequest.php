@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class StoreProductRequest extends FormRequest
@@ -13,7 +14,7 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::id() == $this->user()->id;
     }
 
     /**
@@ -34,7 +35,6 @@ class StoreProductRequest extends FormRequest
             'category' => ['required', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock_quantity' => ['required', 'integer', 'min:0'],
-            'updated_at' => ['date'],
         ];
     }
 
@@ -69,8 +69,7 @@ class StoreProductRequest extends FormRequest
             'price.min' => 'Le prix ne doit pas être inférieur à 0.',
             'stock_quantity.required' => 'La quantité en stock est obligatoire.',
             'stock_quantity.integer' => 'La quantité en stock doit être un entier.',
-            'stock_quantity.min' => 'La quantité en stock ne doit pas être inférieure à 0.',
-            'updated_at.date' => 'La date de mise à jour doit être une date valide.',
+            'stock_quantity.min' => 'La quantité en stock ne doit pas être inférieure à 0.'
         ];
     }
 }

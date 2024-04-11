@@ -28,9 +28,9 @@ class Product extends Model
         'updated_at'
     ];
 
-    public function shops(): BelongsToMany
+    public function shop(): BelongsTo
     {
-        return $this->belongsToMany(Shop::class);
+        return $this->belongsTo(Shop::class);
     }
 
     public function orders(): BelongsToMany
