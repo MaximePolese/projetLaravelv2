@@ -34,7 +34,8 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request): User
     {
-        $user = $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
         $user->save();
         return $user;
     }
@@ -45,10 +46,10 @@ class UserController extends Controller
     public function destroy(Request $request): JsonResponse
     {
         $user = $request->user();
-        Auth::logout();
-        $user->delete();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($user->id == Auth::id()) {
+            $user->currentAccessToken()->delete();
+            $user->delete();
+        }
         return response()->json(['message' => 'User deleted successfully.'], 200);
     }
 }

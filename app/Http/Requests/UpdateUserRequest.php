@@ -15,8 +15,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-//        return Auth::id() == $this->user()->id;
-        return true;
+        return Auth::id() == $this->user()->id;
     }
 
     /**
@@ -27,14 +26,14 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pseudo' => ['string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
-            'address' => ['string', 'max:255'],
-            'phone_number' => ['string', 'max:255'],
-            'image' => ['string', 'max:5000'],
-            'delivery_address' => ['string', 'max:255'],
+            'pseudo' => ['nullable', 'string', 'max:255'],
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'phone_number' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'string', 'max:5000'],
+            'delivery_address' => ['nullable', 'string', 'max:255'],
         ];
     }
 
