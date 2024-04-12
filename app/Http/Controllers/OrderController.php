@@ -81,8 +81,9 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order): Order
     {
-        $order->fill($request->validated());
-        $order->save();
+        //TODO: implement update order
+//        $order->fill($request->validated());
+//        $order->save();
         return $order;
     }
 

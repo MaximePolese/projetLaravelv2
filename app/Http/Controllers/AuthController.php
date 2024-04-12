@@ -57,7 +57,11 @@ class AuthController extends Controller
 
         $user = User::where('email', $request['email'])->firstOrFail();
 
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
+        if ($user->tokens()->first()) {
+            $token = $user->tokens()->first()->plainTextToken;
+        } else {
+            $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
+        }
 
         return response()->json([
             'user' => $user,
