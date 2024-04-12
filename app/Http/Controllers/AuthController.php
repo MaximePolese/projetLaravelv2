@@ -37,7 +37,8 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token', [], now()->addDays(1))->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
+//        $token = $user->createToken('auth_token', [], now()->addMinutes(10))->plainTextToken;
 
         return response()->json([
             'user' => $user,
@@ -56,7 +57,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request['email'])->firstOrFail();
 
-        $token = $user->createToken('auth_token', [], now()->addDays(1))->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
 
         return response()->json([
             'user' => $user,
