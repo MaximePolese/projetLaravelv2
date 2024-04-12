@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
-use App\Models\User;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -31,19 +32,32 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreOrderRequest $request): Order
+    public function store(StoreOrderRequest $request): JsonResponse
     {
-        //TODO: modifier le user pour qu'il soit celui qui est connecté
-        $user = User::all()->first();
         $order = new Order();
+        $user = $request->user();
 
         $lastOrder = Order::orderBy('order_number', 'desc')->first();
         $order->order_number = $lastOrder ? $lastOrder->order_number + 1 : 1;
-
         $order->status = "pending";
 
         $user->orders()->save($order);
-        return $order;
+
+        foreach ($request->input() as $product) {
+            $p = Product::find($product['id']);
+            if ($p) {
+                if ($product['quantity'] > $p->stock_quantity) {
+                    response()->json(['message' => 'Not enough stock for product ' . $p->name], 400);
+                    continue;
+                }
+                $p->stock_quantity -= $product['quantity'];
+                $p->save();
+                $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $p->price]);
+            }
+        }
+
+        $order->save();
+        return response()->json($order, 201);
     }
 
     /**
@@ -51,7 +65,7 @@ class OrderController extends Controller
      */
     public function show(Order $order): Order
     {
-        return $order;
+        return $order->load('products');
     }
 
     /**
@@ -65,7 +79,7 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateOrderRequest $request, Order $order)
+    public function update(UpdateOrderRequest $request, Order $order): Order
     {
         $order->fill($request->validated());
         $order->save();
@@ -77,7 +91,10 @@ class OrderController extends Controller
      */
     public function destroy(Order $order): JsonResponse
     {
-        $order->delete();
+        if (Auth::id() == $order->user_id) {
+            $order->products()->detach();
+            $order->delete();
+        }
         return response()->json(['message' => 'Order deleted successfully.'], 200);
     }
 }

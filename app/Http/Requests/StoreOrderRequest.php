@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::id() == $this->user()->id;
     }
 
     /**
@@ -22,7 +23,9 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            //TODO: Add validation rules
+//            "id" => "required",
+//            "quantity" => "required|integer|min:1"
         ];
     }
 }
