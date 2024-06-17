@@ -29,7 +29,24 @@ class ShopController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *      path="/shops",
+     *      summary="Create a new shop",
+     *      tags={"Shops"},
+     *      security={{"sanctum":{}}},
+     *      @OA\RequestBody(
+     *           required=true,
+     *          @OA\JsonContent(
+     *               required={"shop_name", "shop_theme", "biography"},
+     *                  @OA\Property(property="shop_name", type="string", example="My Shop"),
+     *                  @OA\Property(property="shop_theme", type="string", example="Dark"),
+     *               @OA\Property(property="biography", type="string", example="This is my shop")
+     *              )
+     *      ),
+     *      @OA\Response(response=201, description="Shop created successfully"),
+     *      @OA\Response(response=401, description="Unauthenticated"),
+     *      @OA\Response(response=422, description="Invalid data")
+     * )
      */
     public function store(StoreShopRequest $request): JsonResponse
     {
