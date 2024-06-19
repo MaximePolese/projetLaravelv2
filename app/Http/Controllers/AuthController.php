@@ -13,6 +13,7 @@ class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
+        //TODO: modifier les rules pour créer un user
         $request->validate([
             'pseudo' => ['nullable', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
@@ -39,7 +40,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
 //        $token = $user->createToken('auth_token', [], now()->addMinutes(10))->plainTextToken;
-
+//TODO: vérifier les bonne pratique sur le return du user
         return response()->json([
             'user' => $user,
             'access_token' => $token,
@@ -62,7 +63,7 @@ class AuthController extends Controller
         } else {
             $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
         }
-
+//TODO: vérifier les bonne pratique sur le return du user
         return response()->json([
             'user' => $user,
             'access_token' => $token,

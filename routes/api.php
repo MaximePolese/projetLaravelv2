@@ -26,7 +26,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
     Route::post('/orders', [OrderController::class, 'store']);
-    //TODO: secure the routes below
+    //TODO: secure the routes below, create admin role and add admin middleware
     Route::put('/orders/{order}', [OrderController::class, 'update']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
 });
