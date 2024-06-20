@@ -23,9 +23,9 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //TODO: Add validation rules
-//            "id" => "required",
-//            "quantity" => "required|integer|min:1"
+            "data.*.id" => ["required", 'string', 'max:255'],
+            "data.*.quantity" => ["required", 'integer', 'min:1'],
+            "data.*.price" => ["required", 'numeric', 'min:0'],
         ];
     }
 }

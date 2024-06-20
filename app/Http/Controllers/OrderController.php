@@ -43,21 +43,21 @@ class OrderController extends Controller
 
         $user->orders()->save($order);
 
-        foreach ($request->input() as $product) {
+        foreach ($request->input('data') as $product) {
             $p = Product::find($product['id']);
             if ($p) {
                 if ($product['quantity'] > $p->stock_quantity) {
-                    response()->json(['message' => 'Not enough stock for product ' . $p->name], 400);
-                    continue;
+                    throw new \Exception('Not enough stock for product ' . $p->name);
                 }
                 $p->stock_quantity -= $product['quantity'];
                 $p->save();
-                $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $p->price]);
+                $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $product['price'], 'created_at' => now(),
+                    'updated_at' => now()]);
             }
         }
 
         $order->save();
-        return response()->json($order, 201);
+        return response()->json($order->load('products'), 201);
     }
 
     /**
