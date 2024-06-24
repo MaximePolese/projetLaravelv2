@@ -25,7 +25,6 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        //TODO: modifier les rules pour update un user
         return [
             'pseudo' => ['nullable', 'string', 'max:255'],
             'first_name' => ['nullable', 'string', 'max:255'],
