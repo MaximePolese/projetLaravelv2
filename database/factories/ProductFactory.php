@@ -17,6 +17,11 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $shop = DB::table('shops')->inRandomOrder()->first();
+
+        if (!$shop) {
+            return [];
+        }
         return [
             'product_name' => fake()->word(),
             'description' => fake()->sentence(20),
@@ -28,7 +33,7 @@ class ProductFactory extends Factory
             'category' => fake()->randomElement(['art', 'clothing', 'jewelry', 'accessories', 'home']),
             'price' => fake()->randomFloat(2, 0, 1000),
             'stock_quantity' => fake()->numberBetween(0, 100),
-            'shop_id' => DB::table('shops')->inRandomOrder()->first()->id,
+            'shop_id' => $shop->id,
         ];
     }
 }

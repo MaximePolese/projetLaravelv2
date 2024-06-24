@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Http\Requests\StoreShopRequest;
 use App\Http\Requests\UpdateShopRequest;
@@ -53,6 +52,9 @@ class ShopController extends Controller
         $shop = new Shop();
         $shop->fill($request->validated());
         $user = $request->user();
+        if ($user->role != 'craftman') {
+            $user->role = 'craftman';
+        }
         $user->shops()->save($shop);
         return response()->json($shop, 201);
     }
@@ -89,8 +91,14 @@ class ShopController extends Controller
     public function destroy(Shop $shop): JsonResponse
     {
         if (Auth::id() == $shop->user_id) {
+            $user = $shop->user;
             $shop->delete();
+            if ($user->shops()->count() == 0) {
+                $user->role = 'user';
+                $user->save();
+            }
+            return response()->json(['message' => 'Shop deleted successfully.'], 200);
         }
-        return response()->json(['message' => 'Shop deleted successfully.'], 200);
+        return response()->json(['message' => 'Unauthorized action.'], 403);
     }
 }

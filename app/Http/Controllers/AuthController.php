@@ -36,11 +36,12 @@ class AuthController extends Controller
             'image' => $request->image,
             'delivery_address' => $request->delivery_address,
             'password' => Hash::make($request->password),
+            'role' => 'user',
         ]);
 
         $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
 //        $token = $user->createToken('auth_token', [], now()->addMinutes(10))->plainTextToken;
-//TODO: vérifier les bonne pratique sur le return du user
+//TODO: vérifier les bonnes pratiques sur le return du user
         return response()->json([
             'user' => $user,
             'access_token' => $token,
