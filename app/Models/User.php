@@ -64,4 +64,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Shop::class);
     }
+
+    public function hasRole($role): bool
+    {
+        return $this->role === $role;
+    }
 }

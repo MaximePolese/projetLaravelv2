@@ -13,7 +13,7 @@ class ShopPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        return true;
     }
 
     /**
@@ -21,7 +21,7 @@ class ShopPolicy
      */
     public function view(User $user, Shop $shop): bool
     {
-        //
+        return true;
     }
 
     /**
@@ -29,7 +29,7 @@ class ShopPolicy
      */
     public function create(User $user): bool
     {
-        //
+        return $user->hasRole('user') || $user->hasRole('craftman') || $user->hasRole('admin');
     }
 
     /**
@@ -37,7 +37,7 @@ class ShopPolicy
      */
     public function update(User $user, Shop $shop): bool
     {
-        //
+        return $user->hasRole('craftman') && $user->id == $shop->user_id || $user->hasRole('admin');
     }
 
     /**
@@ -45,7 +45,7 @@ class ShopPolicy
      */
     public function delete(User $user, Shop $shop): bool
     {
-        //
+        return $user->hasRole('craftman') && $user->id == $shop->user_id || $user->hasRole('admin');
     }
 
     /**
@@ -53,7 +53,7 @@ class ShopPolicy
      */
     public function restore(User $user, Shop $shop): bool
     {
-        //
+        return $user->hasRole('admin');
     }
 
     /**
@@ -61,6 +61,6 @@ class ShopPolicy
      */
     public function forceDelete(User $user, Shop $shop): bool
     {
-        //
+        return $user->hasRole('admin');
     }
 }
