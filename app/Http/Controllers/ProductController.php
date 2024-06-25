@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
@@ -35,16 +34,21 @@ class ProductController extends Controller
      * Store a newly created product in the database.
      *
      * @param StoreProductRequest $request
-     * @return Product
+     * @return JsonResponse
      */
-    public function store(StoreProductRequest $request): Product
+    public function store(StoreProductRequest $request): JsonResponse
     {
-        $product = new Product();
-        $user = $request->user();
-        $shop = $user->shops()->find($request->shop_id);
-        $product->fill($request->validated());
-        $shop->products()->save($product);
-        return $product;
+        $response = Gate::inspect('store', Product::class);
+        if ($response->allowed()) {
+            $product = new Product();
+            $user = $request->user();
+            $shop = $user->shops()->find($request->shop_id);
+            $product->fill($request->validated());
+            $shop->products()->save($product);
+            return response()->json($product, 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
     }
 
     /**
@@ -73,13 +77,18 @@ class ProductController extends Controller
      *
      * @param UpdateProductRequest $request
      * @param Product $product
-     * @return Product
+     * @return JsonResponse
      */
-    public function update(UpdateProductRequest $request, Product $product): Product
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
-        $product->fill($request->validated());
-        $product->save();
-        return $product;
+        $response = Gate::inspect('update', $product);
+        if ($response->allowed()) {
+            $product->fill($request->validated());
+            $product->save();
+            return response()->json($product, 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
     }
 
     /**
@@ -90,10 +99,13 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): JsonResponse
     {
-        if (Auth::id() == $product->shop->user_id) {
+        $response = Gate::inspect('delete', $product);
+        if ($response->allowed()) {
             $product->delete();
+            return response()->json(['message' => 'Product deleted successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-        return response()->json(['message' => 'Product deleted successfully.'], 200);
     }
 
     /**
@@ -164,13 +176,5 @@ class ProductController extends Controller
         }
 
         return $query->get();
-    }
-
-//TODO: Implement the addProductToOrder method
-    public function addProductToOrder(Request $request, Product $product): Product
-    {
-//        $order = Auth::user()->orders()->where('status', 'pending')->first();
-//        $order->products()->attach($product->id, ['quantity' => $request->quantity]);
-        return $product;
     }
 }

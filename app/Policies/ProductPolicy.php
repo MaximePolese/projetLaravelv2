@@ -13,7 +13,7 @@ class ProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        //
     }
 
     /**
@@ -21,13 +21,21 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return true;
+        //
     }
 
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can store models.
+     */
+    public function store(User $user): bool
     {
         return $user->hasRole('craftman') || $user->hasRole('admin');
     }
@@ -37,7 +45,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->hasRole('craftman') && $user->id == $product->user_id || $user->hasRole('admin');
+        return $user->hasRole('craftman') && $user->id == $product->shop->user_id || $user->hasRole('admin');
     }
 
     /**
@@ -45,7 +53,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->hasRole('craftman') && $user->id == $product->user_id || $user->hasRole('admin');
+        return $user->hasRole('craftman') && $user->id == $product->shop->user_id || $user->hasRole('admin');
     }
 
     /**

@@ -13,7 +13,7 @@ class ShopPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        //
     }
 
     /**
@@ -21,13 +21,21 @@ class ShopPolicy
      */
     public function view(User $user, Shop $shop): bool
     {
-        return true;
+        //
     }
 
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can store models.
+     */
+    public function store(User $user): bool
     {
         return $user->hasRole('user') || $user->hasRole('craftman') || $user->hasRole('admin');
     }

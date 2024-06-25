@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateShopRequest;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ShopController extends Controller
 {
@@ -49,14 +50,19 @@ class ShopController extends Controller
      */
     public function store(StoreShopRequest $request): JsonResponse
     {
-        $shop = new Shop();
-        $shop->fill($request->validated());
-        $user = $request->user();
-        if ($user->role != 'craftman') {
-            $user->role = 'craftman';
+        $response = Gate::inspect('store', Shop::class);
+        if ($response->allowed()) {
+            $shop = new Shop();
+            $shop->fill($request->validated());
+            $user = $request->user();
+            if ($user->role != 'craftman') {
+                $user->role = 'craftman';
+            }
+            $user->shops()->save($shop);
+            return response()->json($shop, 201);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-        $user->shops()->save($shop);
-        return response()->json($shop, 201);
     }
 
     /**
@@ -80,9 +86,14 @@ class ShopController extends Controller
      */
     public function update(UpdateShopRequest $request, Shop $shop): JsonResponse
     {
-        $shop->fill($request->validated());
-        $shop->save();
-        return response()->json($shop, 200);
+        $response = Gate::inspect('update', $shop);
+        if ($response->allowed()) {
+            $shop->fill($request->validated());
+            $shop->save();
+            return response()->json($shop, 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
     }
 
     /**
@@ -90,7 +101,8 @@ class ShopController extends Controller
      */
     public function destroy(Shop $shop): JsonResponse
     {
-        if (Auth::id() == $shop->user_id) {
+        $response = Gate::inspect('delete', $shop);
+        if ($response->allowed()) {
             $user = $shop->user;
             $shop->delete();
             if ($user->shops()->count() == 0) {
@@ -98,7 +110,8 @@ class ShopController extends Controller
                 $user->save();
             }
             return response()->json(['message' => 'Shop deleted successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-        return response()->json(['message' => 'Unauthorized action.'], 403);
     }
 }

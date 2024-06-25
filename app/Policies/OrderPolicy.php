@@ -29,6 +29,14 @@ class OrderPolicy
      */
     public function create(User $user): bool
     {
+        //
+    }
+
+    /**
+     * Determine whether the user can store models.
+     */
+    public function store(User $user): bool
+    {
         return $user->hasRole('user') || $user->hasRole('craftman') || $user->hasRole('admin');
     }
 
