@@ -32,12 +32,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
 });
 
-Route::get('/csrf', function () {
-    return csrf_token();
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json([
+        'message' => 'CSRF cookie set'
+    ]);
 });
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'authenticate']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/{user}', [UserController::class, 'show']);
 
