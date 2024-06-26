@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -55,7 +54,6 @@ class OrderController extends Controller
                     'updated_at' => now()]);
             }
         }
-
         $order->save();
         return response()->json($order->load('products'), 201);
     }
