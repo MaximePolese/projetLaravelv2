@@ -27,7 +27,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        // not implemented
+        //
     }
 
     /**

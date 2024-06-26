@@ -6,18 +6,22 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Product;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Collection
+    public function index(): JsonResponse
     {
-        return Order::all();
+        $response = Gate::inspect('viewAny', Order::class);
+        if ($response->allowed()) {
+            return response()->json(Order::all()->load('products'), 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
     }
 
     /**
@@ -33,37 +37,47 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): JsonResponse
     {
-        $order = new Order();
-        $user = $request->user();
+        $response = Gate::inspect('store', Order::class);
+        if ($response->allowed()) {
+            $order = new Order();
+            $user = $request->user();
 
-        $lastOrder = Order::orderBy('order_number', 'desc')->first();
-        $order->order_number = $lastOrder ? $lastOrder->order_number + 1 : 1;
-        $order->status = "pending";
+            $lastOrder = Order::orderBy('order_number', 'desc')->first();
+            $order->order_number = $lastOrder ? $lastOrder->order_number + 1 : 1;
+            $order->status = "pending";
 
-        $user->orders()->save($order);
+            $user->orders()->save($order);
 
-        foreach ($request->input('data') as $product) {
-            $p = Product::find($product['id']);
-            if ($p) {
-                if ($product['quantity'] > $p->stock_quantity) {
-                    throw new \Exception('Not enough stock for product ' . $p->name);
+            foreach ($request->input('data') as $product) {
+                $p = Product::find($product['id']);
+                if ($p) {
+                    if ($product['quantity'] > $p->stock_quantity) {
+                        throw new \Exception('Not enough stock for product ' . $p->name);
+                    }
+                    $p->stock_quantity -= $product['quantity'];
+                    $p->save();
+                    $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $product['price'], 'created_at' => now(),
+                        'updated_at' => now()]);
                 }
-                $p->stock_quantity -= $product['quantity'];
-                $p->save();
-                $order->products()->attach($product['id'], ['quantity' => $product['quantity'], 'price' => $product['price'], 'created_at' => now(),
-                    'updated_at' => now()]);
             }
+            $order->save();
+            return response()->json($order->load('products'), 201);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-        $order->save();
-        return response()->json($order->load('products'), 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Order $order): Order
+    public function show(Order $order): JsonResponse
     {
-        return $order->load('products');
+        $response = Gate::inspect('view', $order);
+        if ($response->allowed()) {
+            return response()->json($order->load('products'), 201);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
     }
 
     /**
@@ -79,10 +93,7 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order): Order
     {
-//        TODO: implement update order
-//        $order->fill($request->validated());
-//        $order->save();
-        return $order;
+        //
     }
 
     /**
@@ -90,10 +101,13 @@ class OrderController extends Controller
      */
     public function destroy(Order $order): JsonResponse
     {
-        if (Auth::id() == $order->user_id) {
+        $response = Gate::inspect('delete', $order);
+        if ($response->allowed()) {
             $order->products()->detach();
             $order->delete();
+            return response()->json(['message' => 'Order deleted successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
         }
-        return response()->json(['message' => 'Order deleted successfully.'], 200);
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -13,6 +12,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -25,9 +25,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{order}', [OrderController::class, 'update']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
+});
+
+Route::get('/csrf', function () {
+    return csrf_token();
 });
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -44,8 +50,7 @@ Route::get('/products/search', [ProductController::class, 'searchBy']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 
-Route::get('/orders', [OrderController::class, 'index']);
-Route::get('/orders/{order}', [OrderController::class, 'show']);
+
 
 
 
