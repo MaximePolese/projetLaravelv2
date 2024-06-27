@@ -53,7 +53,7 @@ class UserController extends Controller
     {
         $user = $request->user();
         if ($user->id == Auth::id()) {
-            $user->currentAccessToken()->delete();
+            $user->tokens()->delete();
             $user->delete();
         }
         return response()->json(['message' => 'User deleted successfully.'], 200);

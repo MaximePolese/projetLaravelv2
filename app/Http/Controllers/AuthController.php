@@ -71,11 +71,15 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $user = $request->user();
-        if ($user->id == Auth::id()) {
-            $user->currentAccessToken()->delete();
+        if ($request->user()->id == Auth::id()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            $request->user()->tokens()->delete();
+            return response()->json(['message' => 'Logged out']);
+        } else {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-        return response()->json(['message' => 'Logged out']);
     }
 
 //    public function authenticate(Request $request): JsonResponse
@@ -97,19 +101,6 @@ class AuthController extends Controller
 //            return response()->json([
 //                'message' => 'Invalid credentials',
 //            ], 401);
-//        }
-//    }
-//
-//    public function logout(Request $request): JsonResponse
-//    {
-//        if ($request->user()->id == Auth::id()) {
-//            Auth::logout();
-//            $request->session()->invalidate();
-//            $request->session()->regenerateToken();
-//            $request->user()->tokens()->delete();
-//            return response()->json(['message' => 'Logged out']);
-//        } else {
-//            return response()->json(['message' => 'Unauthorized'], 401);
 //        }
 //    }
 }
