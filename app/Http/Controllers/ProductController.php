@@ -162,8 +162,8 @@ class ProductController extends Controller
         if ($searchTerm) {
             $fields = [
                 'product_name',
-                'description',
-                'story',
+//                'description',
+//                'story',
                 'material',
                 'color',
                 'size',
