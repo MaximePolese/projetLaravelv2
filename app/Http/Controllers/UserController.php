@@ -51,12 +51,17 @@ class UserController extends Controller
      */
     public function destroy(Request $request): JsonResponse
     {
-        $user = $request->user();
-        if ($user->id == Auth::id()) {
-            $user->tokens()->delete();
-            $user->delete();
+        //TODO: implement the delete method when the user has orders (foreign key constraint)
+        if ($request->user()->id == Auth::id()) {
+            Auth::guard('web')->logout();
+            $request->user()->delete();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            //TODO: fix session invalidation
+            return response()->json(['message' => 'User deleted successfully.'], 200);
+        } else {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-        return response()->json(['message' => 'User deleted successfully.'], 200);
     }
 }
 
