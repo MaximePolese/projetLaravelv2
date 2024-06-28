@@ -3,40 +3,19 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Services\UserService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(StoreUserRequest $request): JsonResponse
     {
-        $request->validate([
-            'pseudo' => ['nullable', 'string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'address' => ['required', 'string', 'max:255'],
-            'phone_number' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'string', 'max:5000'],
-            'delivery_address' => ['nullable', 'string', 'max:255'],
-            'password' => ['required', 'confirmed', 'min:8'],
-        ]);
-
-        $user = User::create([
-            'pseudo' => $request->pseudo,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone_number' => $request->phone_number,
-            'image' => $request->image,
-            'delivery_address' => $request->delivery_address,
-            'password' => Hash::make($request->password),
-            'role' => 'user',
-        ]);
+        $service = new UserService();
+        $user = $service->createUser($request->validated());
 
         $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
 

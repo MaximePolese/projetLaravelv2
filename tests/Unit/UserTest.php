@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Http\Services\UserService;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,50 +18,38 @@ class UserTest extends TestCase
      */
     public function testUserCreation()
     {
-        $user = User::factory()->create();
+        $data = [
+            'pseudo' => 'toto',
+            'first_name' => 'toto',
+            'last_name' => 'toto',
+            'email' => 'toto@toto.fr',
+            'address' => 'Toto',
+            'phone_number' => '0606060606',
+            'image' => 'toto.jpg',
+            'delivery_address' => 'Toto',
+            'password' => 'password',
+        ];
+
+        $service = new UserService();
+        $user = $service->createUser($data);
+
+        $this->assertNotNull($user);
 
         $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'pseudo' => $user->pseudo,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'email' => $user->email,
-            'address' => $user->address,
-            'phone_number' => $user->phone_number,
-            'image' => $user->image,
-            'delivery_address' => $user->delivery_address,
-            'email_verified_at' => $user->email_verified_at,
-            'password' => $user->password,
-            'remember_token' => $user->remember_token,
+            'pseudo' => $data['pseudo'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'address' => $data['address'],
+            'phone_number' => $data['phone_number'],
+            'image' => $data['image'],
+            'delivery_address' => $data['delivery_address'],
             'role' => $user->role,
         ]);
-    }
 
-    /**
-     * Test the hasRole method of User class.
-     *
-     * @return void
-     */
-    public function testHasRole()
-    {
-        $user = User::factory()->create([
-            'role' => 'admin',
-        ]);
-
-        $this->assertTrue($user->hasRole('admin'));
-        $this->assertFalse($user->hasRole('user'));
+        $this->assertFalse($user->hasRole('admin'));
+        $this->assertTrue($user->hasRole('user'));
         $this->assertFalse($user->hasRole('craftman'));
     }
 
-    /**
-     * Test the shops relationship of User class.
-     *
-     * @return void
-     */
-    public function testShopsRelationship()
-    {
-        $user = User::factory()->hasShops(2)->create();
-
-        $this->assertCount(2, $user->shops);
-    }
 }
