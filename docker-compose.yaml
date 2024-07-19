@@ -10,8 +10,8 @@ services:
       - craftcorner-network
     environment:
       MYSQL_HOST: mysql
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: secret
+      MYSQL_USER: root
+      MYSQL_PASSWORD: test
       MYSQL_DB: craftcornerdata
     depends_on:
       mysql:
@@ -23,16 +23,14 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ../mysql-data:/var/lib/mysql
     networks:
       - craftcorner-network
     environment:
       MYSQL_DATABASE: craftcornerdata
       MYSQL_ROOT_PASSWORD: test
     healthcheck:
-      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -psecret || exit 1" ]
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -ptest || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
