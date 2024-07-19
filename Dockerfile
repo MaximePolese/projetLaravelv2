@@ -21,8 +21,6 @@ COPY . .
 # Installation et configuration de votre site pour la production
 # https://laravel.com/docs/10.x/deployment#optimizing-configuration-loading
 RUN composer install --no-interaction --optimize-autoloader --no-dev
-# Generate security key
-RUN php artisan key:generate
 # Optimizing Configuration loading
 RUN php artisan config:cache
 # Optimizing Route loading
@@ -31,3 +29,5 @@ RUN php artisan route:cache
 RUN php artisan view:cache
 
 RUN chown -R application:application .
+
+CMD /bin/bash -c php artisan migrate && supervisord

@@ -38,6 +38,10 @@ Route::get('/sanctum/csrf-cookie', function () {
     ]);
 });
 
+Route::get('/cookies', function (Request $request) {
+    dd($request->cookies);
+});
+
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'authenticate']);
 Route::get('/users', [UserController::class, 'index']);
