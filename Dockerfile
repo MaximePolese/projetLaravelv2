@@ -28,4 +28,4 @@ RUN php artisan view:cache
 
 RUN chown -R application:application .
 
-CMD /bin/bash -c php artisan migrate && php artisan config:cache && supervisord
+CMD php artisan migrate --force && php artisan config:cache && supervisord
