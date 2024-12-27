@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - db
+    environment:
+      MYSQL_DATABASE: craftcornerdata
+      MYSQL_ROOT_PASSWORD: test
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -ptest || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: craftcorner-backend
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: craftcornerdata
+      DB_USERNAME: root
+      DB_PASSWORD: test
+      SESSION_DOMAIN: .localhost
+      SANCTUM_STATEFUL_DOMAINS: localhost
+      ALLOWED_ORIGIN: http://localhost # Change this to your frontend URL
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - 8000:80
+    networks:
+      - db
+
+volumes:
+  mysql-data:
+
+networks:
+  db:

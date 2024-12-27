@@ -1,9 +1,32 @@
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - "--api.insecure=false" # Enable the dashboard
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=maxime.polese@le-campus-numerique.fr"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    networks:
+      - web
+
   mysql:
     image: mysql:5.7
     container_name: mysql
-    ports:
-      - 3306:3306
+    expose:
+      - 3306
     volumes:
       - ./mysql-data:/var/lib/mysql
     networks:
@@ -18,9 +41,7 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: maximepolese/craftcorner_backend:latest
     container_name: craftcorner-backend
     environment:
       DB_HOST: mysql
@@ -28,19 +49,45 @@ services:
       DB_DATABASE: craftcornerdata
       DB_USERNAME: root
       DB_PASSWORD: test
-      SESSION_DOMAIN: .localhost
-      SANCTUM_STATEFUL_DOMAINS: localhost
-      ALLOWED_ORIGIN: http://localhost
+      SESSION_DOMAIN: .devlog25.le-campus.eu
+      SANCTUM_STATEFUL_DOMAINS: www.polese.devlog25.le-campus.eu
+      ALLOWED_ORIGIN: https://www.polese.devlog25.le-campus.eu
     depends_on:
       mysql:
         condition: service_healthy
-    ports:
-      - 8000:80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.polese.devlog25.le-campus.eu`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.docker.network=web"
     networks:
       - db
+      - web
+    pull_policy: always
+
+  frontend:
+    image: maximepolese/craftcorner_frontend:latest
+    container_name: craftcorner-frontend
+    environment:
+      VITE_API_URL: https://api.polese.devlog25.le-campus.eu/api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`www.polese.devlog25.le-campus.eu`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+    networks:
+      - web
+    pull_policy: always
 
 volumes:
   mysql-data:
+  letsencrypt:
 
 networks:
+  web:
+    name: web
   db:
+    name: db
